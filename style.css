@@ -1,0 +1,799 @@
+/* =========================================================
+   PARA VOCÊ, MÃE — design system
+   Paleta: Preto, Branco, Rosa suave, Dourado leve
+   ========================================================= */
+
+:root {
+  --bg: #07060a;
+  --bg-soft: #0f0d14;
+  --ink: #f5f1ea;
+  --ink-dim: rgba(245, 241, 234, 0.6);
+  --rose: #f3c7d1;
+  --rose-soft: #ffd9e0;
+  --gold: #d9b46a;
+  --gold-soft: #f0d999;
+
+  --font-display: "Cormorant Garamond", serif;
+  --font-mono: "Share Tech Mono", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-display);
+  overflow: hidden;
+}
+
+body {
+  background:
+    radial-gradient(
+      ellipse at 50% 30%,
+      rgba(243, 199, 209, 0.08),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse at 50% 80%,
+      rgba(217, 180, 106, 0.05),
+      transparent 60%
+    ),
+    var(--bg);
+  animation: ambientPulse 8s ease-in-out infinite;
+}
+
+#particles {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* =========================================================
+   SCENES
+   ========================================================= */
+.scene {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.scene.active {
+  display: flex;
+  opacity: 1;
+}
+
+/* =========================================================
+   CLOCK
+   ========================================================= */
+.clock-display {
+  font-family: var(--font-mono);
+  letter-spacing: 0.18em;
+  color: var(--ink);
+  text-shadow:
+    0 0 12px rgba(243, 199, 209, 0.15),
+    0 0 30px rgba(217, 180, 106, 0.05);
+}
+
+.clock-time {
+  font-size: clamp(3.5rem, 11vw, 9rem);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.clock-date {
+  margin-top: 0.8rem;
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  color: var(--ink-dim);
+  letter-spacing: 0.4em;
+}
+
+.clock-display.rewinding .clock-time,
+.clock-display.rewinding .clock-date {
+  color: var(--rose);
+  text-shadow:
+    0 0 14px rgba(243, 199, 209, 0.5),
+    0 0 40px rgba(217, 180, 106, 0.2);
+}
+
+.clock-display.frozen .clock-time {
+  color: var(--gold-soft);
+  text-shadow: 0 0 30px rgba(217, 180, 106, 0.4);
+}
+
+/* =========================================================
+   START BUTTON
+   ========================================================= */
+.start-wrap,
+.rewind-wrap,
+.message-wrap,
+.final-wrap {
+  padding: 2rem;
+  max-width: 900px;
+}
+
+.btn-start {
+  margin-top: 3rem;
+  padding: 1rem 3.5rem;
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid rgba(245, 241, 234, 0.4);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  letter-spacing: 0.4em;
+  cursor: pointer;
+  transition: all 0.5s ease;
+  position: relative;
+  overflow: hidden;
+  animation: floatBtn 4s ease-in-out infinite;
+}
+.btn-start::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(243, 199, 209, 0.25),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.btn-start:hover {
+  border-color: var(--rose);
+  color: var(--rose-soft);
+  letter-spacing: 0.55em;
+  box-shadow: 0 0 40px rgba(243, 199, 209, 0.25);
+}
+.btn-start:hover::before {
+  opacity: 1;
+}
+
+.btn-replay {
+  margin-top: 2.5rem;
+  border-color: var(--gold);
+  color: var(--gold-soft);
+}
+.btn-replay:hover {
+  border-color: var(--gold-soft);
+  color: var(--ink);
+  box-shadow: 0 0 40px rgba(217, 180, 106, 0.35);
+}
+
+.start-quote {
+  margin-top: 2rem;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--ink-dim);
+  letter-spacing: 0.05em;
+}
+
+/* =========================================================
+   GLITCH OVERLAY (rewind)
+   ========================================================= */
+.glitch-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.02) 0px,
+    rgba(255, 255, 255, 0.02) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  mix-blend-mode: overlay;
+  opacity: 0;
+}
+
+.scene#scene-rewind.active .glitch-overlay {
+  opacity: 1;
+  animation: glitchShift 0.18s steps(2) infinite;
+}
+
+@keyframes glitchShift {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-2px, 1px);
+  }
+  50% {
+    transform: translate(2px, -1px);
+  }
+  75% {
+    transform: translate(-1px, 2px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* =========================================================
+   SLIDESHOW
+   ========================================================= */
+.slideshow-wrap {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.1);
+  transition:
+    opacity 1.2s ease,
+    transform 5s ease;
+}
+.slide.active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.slide-photo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 3.5rem);
+  z-index: 1;
+}
+
+/* Backdrop: a própria foto desfocada preenche o fundo,
+   evitando cor sólida e mantendo a foto inteira visível */
+.slide-photo::before {
+  content: "";
+  position: absolute;
+  inset: -6%;
+  background-image: var(--img);
+  background-size: cover;
+  background-position: center;
+  filter: blur(38px) brightness(0.55) saturate(1.1);
+  transform: scale(1.15);
+  z-index: -1;
+}
+
+.slide-photo img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(92vw, 980px);
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: 10px;
+  box-shadow:
+    0 28px 80px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(245, 241, 234, 0.14);
+  background: rgba(7, 6, 10, 0.18);
+}
+
+.slide-photo::after {
+  content: none;
+}
+
+.slide-caption {
+  position: absolute;
+  bottom: 12%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-style: italic;
+  font-size: clamp(1.2rem, 2.4vw, 1.8rem);
+  color: var(--rose-soft);
+  letter-spacing: 0.05em;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 1s ease,
+    transform 1s ease;
+}
+.slide-caption.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* =========================================================
+   FINAL MESSAGE
+   ========================================================= */
+.typed {
+  font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+  line-height: 1.6;
+  font-weight: 300;
+  color: var(--ink);
+  white-space: pre-wrap;
+  min-height: 12rem;
+}
+.typed .cursor {
+  display: inline-block;
+  width: 2px;
+  background: var(--rose);
+  margin-left: 4px;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* =========================================================
+   FINAL SCENE
+   ========================================================= */
+.final-quote {
+  margin-top: 2.5rem;
+  font-style: italic;
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  color: var(--ink-dim);
+  line-height: 1.8;
+}
+
+.final-title {
+  margin-top: 2.5rem;
+  font-size: clamp(2.4rem, 6vw, 4.4rem);
+  font-weight: 300;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+.final-title .heart {
+  color: var(--rose);
+  display: inline-block;
+  animation: heartbeat 1.6s ease-in-out infinite;
+  cursor: pointer;
+  transition:
+    transform 0.3s ease,
+    text-shadow 0.3s ease;
+}
+.final-title .heart:hover {
+  text-shadow: 0 0 30px rgba(243, 199, 209, 0.8);
+}
+.replay-hint {
+  margin-top: 2rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.3em;
+  color: var(--ink-dim);
+  opacity: 0.7;
+  transition: opacity 2.5s ease;
+}
+.replay-hint kbd {
+  font-family: var(--font-mono);
+  background: rgba(245, 241, 234, 0.08);
+  border: 1px solid rgba(245, 241, 234, 0.25);
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+.final-fade .replay-hint {
+  opacity: 0;
+}
+@keyframes heartbeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  20% {
+    transform: scale(1.18);
+  }
+  40% {
+    transform: scale(1);
+  }
+  60% {
+    transform: scale(1.12);
+  }
+  80% {
+    transform: scale(1);
+  }
+}
+
+@keyframes ambientPulse {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+
+  50% {
+    filter: brightness(1.08);
+  }
+}
+
+@keyframes floatBtn {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* =========================================================
+   CINEMATIC ADD-ONS
+   ========================================================= */
+
+/* Custom cursor — coração */
+html,
+body {
+  cursor: none;
+}
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: normal;
+  will-change: transform;
+}
+.cursor-dot {
+  font-size: 18px;
+  color: #ff6b88;
+  text-shadow: 0 0 10px rgba(255, 107, 136, 0.7);
+  transition:
+    font-size 0.25s ease,
+    opacity 0.3s;
+}
+.cursor-dot::before {
+  content: "♥";
+}
+.cursor-ring {
+  font-size: 34px;
+  color: rgba(243, 199, 209, 0.45);
+  text-shadow: 0 0 18px rgba(243, 199, 209, 0.35);
+  transition:
+    font-size 0.3s ease,
+    color 0.3s ease,
+    opacity 0.3s;
+}
+.cursor-ring::before {
+  content: "♡";
+}
+.cursor-ring.hover {
+  font-size: 50px;
+  color: var(--gold-soft);
+}
+.cursor-dot.hover {
+  font-size: 24px;
+}
+
+/* Vignette over everything */
+.vignette {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 45%,
+    rgba(0, 0, 0, 0.55) 90%,
+    rgba(0, 0, 0, 0.92) 100%
+  );
+}
+
+/* Film grain overlay (animated noise via SVG) — leve */
+.film-grain {
+  position: fixed;
+  inset: -10%;
+  width: 120%;
+  height: 120%;
+  pointer-events: none;
+  z-index: 51;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.6 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  mix-blend-mode: overlay;
+  animation: grainShift 1.6s steps(4) infinite;
+  will-change: transform;
+}
+@keyframes grainShift {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-1%, 1%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* Dust specks layer — leve */
+.film-dust {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 52;
+  opacity: 0.12;
+  background-image:
+    radial-gradient(
+      1px 1px at 20% 30%,
+      rgba(255, 255, 255, 0.4),
+      transparent 60%
+    ),
+    radial-gradient(
+      1px 1px at 70% 60%,
+      rgba(255, 255, 255, 0.35),
+      transparent 60%
+    ),
+    radial-gradient(
+      2px 2px at 40% 80%,
+      rgba(255, 255, 255, 0.25),
+      transparent 60%
+    );
+  animation: dustDrift 8s ease-in-out infinite;
+  mix-blend-mode: screen;
+}
+@keyframes dustDrift {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(4px, -3px);
+  }
+}
+
+/* Old camera flicker — sutil */
+.camera-flicker {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 53;
+  background: rgba(255, 240, 200, 0.025);
+  animation: flicker 2.4s ease-in-out infinite;
+}
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* Slideshow — foto inteira sempre visível, sem desfoque na frente */
+#scene-slideshow .slide {
+  transition: opacity 1.6s ease;
+  opacity: 0;
+}
+#scene-slideshow .slide.active {
+  opacity: 1;
+}
+/* Parallax SUTIL apenas no backdrop desfocado, nunca na foto principal */
+#scene-slideshow .slide.active .slide-photo::before {
+  animation: parallaxDrift 18s ease-in-out forwards;
+}
+@keyframes parallaxDrift {
+  0% {
+    transform: scale(1.18) translate(-1%, -0.5%);
+  }
+  100% {
+    transform: scale(1.24) translate(1%, -1%);
+  }
+}
+
+/* Scene transition (sem blur pesado) */
+.scene {
+  transition: opacity 1s ease;
+}
+
+/* Final fade-to-black */
+.final-fade .vignette,
+.final-fade .film-grain,
+.final-fade .film-dust,
+.final-fade #particles,
+.final-fade .camera-flicker {
+  opacity: 0 !important;
+  transition: opacity 3s ease;
+}
+.final-fade #scene-final .clock-display,
+.final-fade #scene-final .final-quote,
+.final-fade #scene-final .btn-replay {
+  opacity: 0;
+  transition: opacity 2.5s ease;
+}
+#scene-final {
+  background: transparent;
+  transition: background 4s ease;
+}
+.final-fade #scene-final {
+  background: #000;
+}
+.final-fade .final-title {
+  transform: scale(1.05);
+  transition: transform 4s ease;
+}
+
+/* Touch devices: oculta o cursor customizado (não existe em touch) */
+@media (hover: none) and (pointer: coarse) {
+  html,
+  body {
+    cursor: auto;
+  }
+  .cursor-dot,
+  .cursor-ring {
+    display: none;
+  }
+}
+
+/* ── Telas pequenas (até 480 px — smartphones compactos) ── */
+@media (max-width: 480px) {
+  /* Wraps genéricos */
+  .start-wrap,
+  .rewind-wrap,
+  .message-wrap,
+  .final-wrap {
+    padding: 1.25rem;
+    text-align: center;
+  }
+
+  /* Relógio */
+  .clock-time {
+    font-size: clamp(2.6rem, 17vw, 4rem);
+  }
+  .clock-date {
+    font-size: clamp(0.7rem, 3.5vw, 0.95rem);
+    letter-spacing: 0.18em;
+    margin-top: 0.5rem;
+  }
+
+  /* Botões */
+  .btn-start {
+    padding: 0.85rem 2rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.22em;
+    margin-top: 1.75rem;
+  }
+
+  /* Slideshow */
+  .slide-photo {
+    padding: 0.75rem;
+  }
+  .slide-photo img {
+    max-width: 98vw;
+    max-height: 68vh;
+    border-radius: 6px;
+  }
+  .slide-caption {
+    bottom: 5%;
+    font-size: clamp(0.95rem, 4.5vw, 1.2rem);
+    padding: 0 1rem;
+  }
+
+  /* Texto digitado */
+  .typed {
+    font-size: clamp(1.1rem, 5.2vw, 1.6rem);
+    min-height: 7rem;
+  }
+
+  /* Cena final */
+  .final-title {
+    font-size: clamp(1.9rem, 9vw, 2.8rem);
+    margin-top: 1.25rem;
+  }
+  .final-quote {
+    font-size: clamp(0.9rem, 3.8vw, 1.15rem);
+    margin-top: 1.25rem;
+  }
+  .start-quote {
+    font-size: 0.88rem;
+    margin-top: 1.25rem;
+  }
+  .replay-hint {
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    margin-top: 1.25rem;
+  }
+}
+
+/* ── Telas médias (481 px – 768 px — smartphones grandes e phablets) ── */
+@media (min-width: 481px) and (max-width: 768px) {
+  .start-wrap,
+  .rewind-wrap,
+  .message-wrap,
+  .final-wrap {
+    padding: 1.5rem;
+  }
+
+  /* Botões */
+  .btn-start {
+    padding: 0.9rem 2.6rem;
+    font-size: 0.95rem;
+    letter-spacing: 0.28em;
+    margin-top: 2rem;
+  }
+
+  /* Slideshow */
+  .slide-photo {
+    padding: 1rem;
+  }
+  .slide-photo img {
+    max-width: 96vw;
+    max-height: 72vh;
+  }
+  .slide-caption {
+    bottom: 7%;
+    font-size: clamp(1.05rem, 3.5vw, 1.45rem);
+    padding: 0 1.5rem;
+  }
+
+  /* Texto digitado */
+  .typed {
+    font-size: clamp(1.3rem, 4vw, 1.9rem);
+    min-height: 9rem;
+  }
+
+  /* Cena final */
+  .final-title {
+    font-size: clamp(2.1rem, 7vw, 3.2rem);
+  }
+  .final-quote {
+    font-size: clamp(1rem, 3vw, 1.3rem);
+  }
+}
+
+/* ── Telas muito baixas (landscape em celular, altura ≤ 500 px) ── */
+@media (max-height: 500px) {
+  .start-wrap,
+  .rewind-wrap,
+  .message-wrap,
+  .final-wrap {
+    padding: 0.75rem 1.25rem;
+  }
+
+  .clock-time {
+    font-size: clamp(2.2rem, 12vw, 3.5rem);
+  }
+  .clock-date {
+    margin-top: 0.3rem;
+  }
+
+  .slide-photo img {
+    max-height: 58vh;
+  }
+  .slide-caption {
+    bottom: 3%;
+    font-size: clamp(0.85rem, 3.5vw, 1.1rem);
+  }
+
+  .typed {
+    font-size: clamp(1rem, 3.5vw, 1.4rem);
+    min-height: 5rem;
+  }
+
+  .final-title {
+    margin-top: 0.75rem;
+    font-size: clamp(1.6rem, 7vw, 2.4rem);
+  }
+  .final-quote {
+    margin-top: 0.75rem;
+  }
+  .btn-start {
+    margin-top: 1rem;
+  }
+}

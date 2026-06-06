@@ -3,7 +3,7 @@
   const EMPTY_IMAGE =
     "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
 
-  const MAX_SLIDES = 20;
+  const MAX_SLIDES = 50;
   const DEFAULT_SLIDES = [
     {
       src: "https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?auto=format&fit=crop&w=1200&q=80",
@@ -92,7 +92,8 @@
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return JSON.parse(JSON.stringify(DEFAULTS));
       return deepMerge(DEFAULTS, JSON.parse(raw));
-    } catch {
+    } catch (err) {
+      console.error("Erro ao carregar configuração:", err);
       return JSON.parse(JSON.stringify(DEFAULTS));
     }
   }
@@ -146,7 +147,7 @@
     const caption = document.getElementById("slideCaption");
     (cfg.slides || []).forEach((s, i) => {
       const src = s.src || EMPTY_IMAGE;
-      const bg = s.src ? `--img: url('${s.src.replace(/'/g, "\\'")}')` : "";
+      const bg = s.src ? `--img: url('${escapeCSSUrl(s.src)}')` : "";
       const div = document.createElement("div");
       div.className = "slide";
       div.dataset.caption = s.caption || "";
@@ -162,6 +163,10 @@
         window.ImageStore.hydrateElement(img, s.imageId, photo);
       }
     });
+  }
+
+  function escapeCSSUrl(url) {
+    return url.replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, '\\"');
   }
 
   function applyAll(cfg) {

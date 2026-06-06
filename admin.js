@@ -36,7 +36,7 @@
     },
   ];
 
-  const MAX_SLIDES = window.SiteConfig.MAX_SLIDES || 20;
+  const MAX_SLIDES = window.SiteConfig.MAX_SLIDES || 50;
   const EXAMPLE_SLIDE = {
     src: "https://images.unsplash.com/photo-1542037104857-ffbb0b9155fb?auto=format&fit=crop&w=1200&q=80",
     caption: "Nova memória…",
@@ -207,12 +207,13 @@
   }
 
   function esc(s) {
-    return String(s ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
+    const str = String(s ?? "");
+    return str
+      .split("&").join("&amp;")
+      .split("<").join("&lt;")
+      .split(">").join("&gt;")
+      .split('"').join("&quot;")
+      .split("'").join("&#39;");
   }
 
   function wire() {
@@ -251,8 +252,11 @@
     });
     panel.querySelectorAll("[data-bday]").forEach((el) => {
       el.addEventListener("input", () => {
-        cfg.birthday = cfg.birthday || {};
-        cfg.birthday[el.dataset.bday] = parseInt(el.value, 10) || 0;
+        const val = parseInt(el.value, 10);
+        if (!isNaN(val) && val > 0) {
+          cfg.birthday = cfg.birthday || {};
+          cfg.birthday[el.dataset.bday] = val;
+        }
       });
     });
 
@@ -314,7 +318,8 @@
   }
 
   function refreshPhotosTab() {
-    panel.querySelector('.admin-tab[data-tab="fotos"]').innerHTML = renderPhotosTab();
+    panel.querySelector('.admin-tab[data-tab="fotos"]').innerHTML =
+      renderPhotosTab();
     wirePhotos();
   }
 
@@ -335,7 +340,7 @@
       const file = input.files?.[0];
       if (!file) return;
       if (!window.ImageStore) {
-        alert("Seu navegador não está com IndexedDB disponível para salvar imagens.");
+        alert("Falha ao inicializar o sistema de imagens.");
         return;
       }
       try {
@@ -351,10 +356,14 @@
           window.ImageStore.deleteImage(previousId);
         }
         refreshPhotosTab();
-        toast(`Foto otimizada ✓ ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(stored.size / 1024).toFixed(0)}KB`);
+        toast(
+          `Foto otimizada ✓ ${(file.size / 1024 / 1024).toFixed(1)}MB → ${(stored.size / 1024).toFixed(0)}KB`,
+        );
       } catch (err) {
         console.error(err);
-        alert("Não foi possível processar esta imagem. Tente outra foto em JPG, PNG, SVG ou WebP.");
+        alert(
+          "Não foi possível processar esta imagem. Tente outra foto em JPG, PNG, SVG ou WebP.",
+        );
       }
     };
     input.click();
@@ -454,10 +463,11 @@
 
   function rebuildAll() {
     if (!panel) return;
-    panel.querySelector('.admin-tab[data-tab="textos"]').innerHTML = renderTextsTab();
-    panel.querySelector('.admin-tab[data-tab="fotos"]').innerHTML = renderPhotosTab();
-    panel.querySelector('.admin-tab[data-tab="aparencia"]').innerHTML = renderThemeTab();
-    panel.querySelector('.admin-tab[data-tab="dados"]').innerHTML = renderDataTab();
+    const tabs = ["textos", "fotos", "aparencia", "dados"];
+    const renders = [renderTextsTab, renderPhotosTab, renderThemeTab, renderDataTab];
+    tabs.forEach((tab, i) => {
+      panel.querySelector(`.admin-tab[data-tab="${tab}"]`).innerHTML = renders[i]();
+    });
     wire();
   }
 
@@ -477,7 +487,7 @@
     panel?.classList.contains("open") ? close() : open();
   });
   document.addEventListener("keydown", (e) => {
-    if (e.ctrlKey && e.shiftKey && (e.key === "E" || e.key === "e")) {
+    if (e.ctrlKey && e.shiftKey && e.key.toUpperCase() === "E") {
       e.preventDefault();
       panel?.classList.contains("open") ? close() : open();
     } else if (e.key === "Escape" && panel?.classList.contains("open")) {

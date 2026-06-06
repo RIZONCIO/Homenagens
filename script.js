@@ -31,7 +31,11 @@ const sounds = {
     html5: true,
   }),
 };
-Object.values(sounds).forEach((s) => s.on("loaderror", () => {}));
+Object.values(sounds).forEach((s) => {
+  s.on("loaderror", () => {
+    console.warn("Erro ao carregar arquivo de áudio");
+  });
+});
 
 // === HELPERS ===
 const $ = (s) => document.querySelector(s);
@@ -318,4 +322,8 @@ document.addEventListener("keydown", (e) => {
 const replayHeart = document.getElementById("replayHeart");
 if (replayHeart) replayHeart.addEventListener("click", replay);
 
-if (window.AOS) AOS.init({ duration: 1200, once: true });
+if (window.AOS) {
+  AOS.init({ duration: 1200, once: true });
+} else {
+  console.warn("AOS não foi carregado");
+}

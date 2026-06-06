@@ -66,7 +66,10 @@
       const img = new Image();
       img.decoding = "async";
       img.src = url;
-      await img.decode();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout ao carregar imagem")), 30000)
+      );
+      await Promise.race([img.decode(), timeoutPromise]);
       return img;
     } finally {
       URL.revokeObjectURL(url);
@@ -76,7 +79,10 @@
   function canvasToBlob(canvas) {
     return new Promise((resolve, reject) => {
       canvas.toBlob(
-        (blob) => (blob ? resolve(blob) : reject(new Error("Falha ao converter imagem para WebP."))),
+        (blob) => {
+          if (blob) resolve(blob);
+          else reject(new Error("Erro ao converter imagem para WebP"));
+        },
         "image/webp",
         WEBP_QUALITY,
       );
@@ -150,13 +156,25 @@
   async function deleteImage(id) {
     if (!id) return;
     const url = objectUrls.get(id);
-    if (url) URL.revokeObjectURL(url);
+    if (url) {
+      try {
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.warn("Erro ao limpar URL:", err);
+      }
+    }
     objectUrls.delete(id);
     await withStore("readwrite", (store) => store.delete(id));
   }
 
   async function clear() {
-    objectUrls.forEach((url) => URL.revokeObjectURL(url));
+    objectUrls.forEach((url) => {
+      try {
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.warn("Erro ao limpar URL em clear():", err);
+      }
+    });
     objectUrls.clear();
     await withStore("readwrite", (store) => store.clear());
   }
